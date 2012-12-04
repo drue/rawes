@@ -78,6 +78,8 @@ class Elastic(object):
         # Encode data dict to json if necessary
         if 'data' in kwargs and type(kwargs['data']) == dict:
             kwargs['data'] = json.dumps(kwargs['data'], default=json_encoder)
+        elif 'data' in kwargs and type(kwargs['data']) == list:
+            kwargs['data'] = '\n'.join([json.dumps(d, default=json_encoder) for d in kwargs['data']]) + '\n'
 
         return self.connection.request(method, new_path, **kwargs)
 

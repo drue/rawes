@@ -172,14 +172,12 @@ class TestElasticCore(unittest.TestCase):
     def _test_bulk_load(self, es):
         index_size = es[config.ES_INDEX][config.ES_TYPE].get('_search',params={'size':0})['hits']['total']
 
-        bulk_body = '''
-        {"index" : {}}
-        {"key":"value1"}
-        {"index" : {}}
-        {"key":"value2"}
-        {"index" : {}}
-        {"key":"value3"}
-        '''
+        bulk_body = [{"index" : {}},
+                     {"key":"value1"},
+                     {"index" : {}},
+                     {"key":"value2"},
+                     {"index" : {}},
+                     {"key":"value3"}]
 
         es[config.ES_INDEX][config.ES_TYPE].post('_bulk', data = bulk_body, params={
             'refresh': 'true'
@@ -197,8 +195,7 @@ class TestElasticCore(unittest.TestCase):
             {"key":"value6"}
         ]
 
-        bulk_body_2 = '\n'.join(map(json.dumps, bulk_list))+'\n'
-        es[config.ES_INDEX][config.ES_TYPE].post('_bulk', data = bulk_body_2, params={
+        es[config.ES_INDEX][config.ES_TYPE].post('_bulk', data = bulk_list, params={
             'refresh': 'true'
         })
         newer_index_size = es[config.ES_INDEX][config.ES_TYPE].get('_search',params={'size':0})['hits']['total']
