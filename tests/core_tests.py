@@ -26,6 +26,12 @@ import json
 from datetime import datetime
 from dateutil import tz
 
+thrift_installed = True
+try:
+    import thrift
+except ImportError:
+    thrift_installed = False
+    
 import logging
 log_level = logging.ERROR
 log_format = '[%(levelname)s] [%(name)s] %(asctime)s - %(message)s'
@@ -42,8 +48,9 @@ class TestElasticCore(unittest.TestCase):
     def setUpClass(self):
         http_url = '%s:%s' % (config.ES_HOST, config.ES_HTTP_PORT)
         self.es_http = rawes.Elastic(url=http_url)
-        thrift_url = '%s:%s' % (config.ES_HOST, config.ES_THRIFT_PORT)
-        self.es_thrift = rawes.Elastic(url=thrift_url)
+        if thrift_installed:
+            thrift_url = '%s:%s' % (config.ES_HOST, config.ES_THRIFT_PORT)
+            self.es_thrift = rawes.Elastic(url=thrift_url)
 
     def test_http(self):
         self._reset_indices(self.es_http)
@@ -54,14 +61,15 @@ class TestElasticCore(unittest.TestCase):
         self._test_datetime_encoder(self.es_http)
         self._test_custom_encoder(self.es_http)
 
-    def test_thrift(self):
-        self._reset_indices(self.es_thrift)
-        self._test_document_search(self.es_thrift)
-        self._test_document_update(self.es_thrift)
-        self._test_document_delete(self.es_thrift)
-        self._test_bulk_load(self.es_thrift)
-        self._test_datetime_encoder(self.es_http)
-        self._test_custom_encoder(self.es_http)
+    if thrift_installed:
+        def test_thrift(self):
+            self._reset_indices(self.es_thrift)
+            self._test_document_search(self.es_thrift)
+            self._test_document_update(self.es_thrift)
+            self._test_document_delete(self.es_thrift)
+            self._test_bulk_load(self.es_thrift)
+            self._test_datetime_encoder(self.es_http)
+            self._test_custom_encoder(self.es_http)
 
     def _reset_indices(self, es):
         # If the index does not exist, test creating it and deleting it

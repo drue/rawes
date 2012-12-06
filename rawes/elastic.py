@@ -19,7 +19,13 @@ try:
 except ImportError:
     import json
 
-from thrift_connection import ThriftConnection
+try:
+    from thrift_connection import ThriftConnection
+except ImportError:
+    thrift_installed = False
+else:
+    thrift_installed = True
+    
 from http_connection import HttpConnection
 from rawes.encoders import encode_date_optional_time
 
@@ -35,7 +41,7 @@ class Elastic(object):
         self.path = path
 
         if connection_type is None:
-            if self.port >= 9500 and self.port <= 9600:
+            if thrift_installed and self.port >= 9500 and self.port <= 9600:
                 self.connection_type = 'thrift'
             else:
                 self.connection_type = 'http'
